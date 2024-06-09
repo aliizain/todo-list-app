@@ -21,6 +21,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -28,6 +30,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.todolistapp.ui.components.CreateTaskDialog
 import com.example.todolistapp.ui.components.TaskItem
 import com.example.todolistapp.ui.theme.backgroundColor
 import com.example.todolistapp.ui.theme.buttonColor
@@ -35,11 +38,25 @@ import com.example.todolistapp.ui.theme.textColor
 
 @Composable
 fun TaskListScreen(modifier: Modifier = Modifier) {
+
+    val showDialog =  remember { mutableStateOf(false) }
+
+    if(showDialog.value) {
+        CreateTaskDialog(
+            value = "",
+            setShowDialog = {
+                showDialog.value = it
+            }
+        )
+    }
+
     Scaffold(
         modifier = modifier.fillMaxSize(),
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { /* Add your action here */ },
+                onClick = {
+                    showDialog.value = true
+                },
                 modifier = Modifier
                     .offset(y = (-36).dp),
                 shape = CircleShape,
@@ -82,7 +99,7 @@ fun TaskListScreen(modifier: Modifier = Modifier) {
                     contentPadding = PaddingValues(vertical = 12.dp, horizontal = 12.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    items(5) {
+                    items(40) {
                         TaskItem()
                     }
                 }
