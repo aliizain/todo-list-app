@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -21,6 +22,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -30,24 +33,53 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.todolistapp.ui.components.CreateTaskDialog
-import com.example.todolistapp.ui.components.TaskItem
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.todolistapp.TodoViewModel
+import com.example.todolistapp.data.Todo
+import com.example.todolistapp.ui.components.CreateTodoDialog
+import com.example.todolistapp.ui.components.EditTodoDialog
+import com.example.todolistapp.ui.components.TodoItem
 import com.example.todolistapp.ui.theme.backgroundColor
 import com.example.todolistapp.ui.theme.buttonColor
 import com.example.todolistapp.ui.theme.textColor
 
 @Composable
-fun TaskListScreen(modifier: Modifier = Modifier) {
+fun TodoListScreen(
+    modifier: Modifier = Modifier,
+    todoViewModel: TodoViewModel = viewModel()
+) {
+
+    val todoList by todoViewModel.todoList.collectAsState()
 
     val showDialog =  remember { mutableStateOf(false) }
+    val showEditDialog =  remember { mutableStateOf(false) }
+    val (selectedTodo, setSelectedTodo) = remember { mutableStateOf<Todo?>(null) }
 
     if(showDialog.value) {
-        CreateTaskDialog(
+        CreateTodoDialog(
             value = "",
             setShowDialog = {
                 showDialog.value = it
+            },
+            onAddClick = {
+                todoViewModel.insert(todo = Todo(task = it, isCompleted = false))
             }
         )
+    }
+
+    if(showEditDialog.value) {
+        selectedTodo?.let { todo ->
+            EditTodoDialog(
+                value = todo.task,
+                setShowDialog = {
+                    showEditDialog.value = it
+                },
+                onSaveClick = { newTaskName ->
+                    todoViewModel.update(todo.copy(task = newTaskName))
+                    showEditDialog.value = false
+                }
+            )
+        }
     }
 
     Scaffold(
@@ -99,8 +131,20 @@ fun TaskListScreen(modifier: Modifier = Modifier) {
                     contentPadding = PaddingValues(vertical = 12.dp, horizontal = 12.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    items(40) {
-                        TaskItem()
+                    items(todoList) { todo ->
+                        TodoItem(
+                            todo = todo,
+                            onClick = {
+                                setSelectedTodo(todo)
+                                showEditDialog.value = true
+                            },
+                            onDeleteClick = {
+                                todoViewModel.delete(todo = todo)
+                            },
+                            onCheckedChange = { isChecked ->
+                                todoViewModel.update(todo.copy(isCompleted = isChecked))
+                            }
+                        )
                     }
                 }
             }
@@ -110,6 +154,6 @@ fun TaskListScreen(modifier: Modifier = Modifier) {
 
 @Preview(showBackground = true)
 @Composable
-fun TaskListScreenPreview() {
-    TaskListScreen()
+fun TodoListScreenPreview() {
+    TodoListScreen()
 }
