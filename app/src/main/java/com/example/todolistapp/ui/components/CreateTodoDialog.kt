@@ -29,9 +29,10 @@ import com.example.todolistapp.ui.theme.buttonColor
 import com.example.todolistapp.ui.theme.textColor
 
 @Composable
-fun CreateTaskDialog(
+fun CreateTodoDialog(
     value: String,
-    setShowDialog: (Boolean) -> Unit
+    setShowDialog: (Boolean) -> Unit,
+    onAddClick: (String) -> Unit
 ) {
 
     val textFieldValue = remember { mutableStateOf(value) }
@@ -92,7 +93,10 @@ fun CreateTaskDialog(
                             elevation = ButtonDefaults.buttonElevation(
                                 defaultElevation = 5.dp
                             ),
-                            onClick = { setShowDialog(false) }
+                            onClick = {
+                                setShowDialog(false)
+                                onAddClick(textFieldValue.value)
+                            }
                         ) {
                             Text(
                                 text = "ADD",
@@ -108,6 +112,6 @@ fun CreateTaskDialog(
 
 @Preview(showBackground = true)
 @Composable
-fun CreateTaskDialogPreview() {
-    CreateTaskDialog(value = "", setShowDialog = {})
+fun CreateTodoDialogPreview() {
+    CreateTodoDialog(value = "", setShowDialog = {}, onAddClick = {})
 }

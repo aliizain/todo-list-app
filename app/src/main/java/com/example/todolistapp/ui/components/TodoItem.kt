@@ -1,5 +1,6 @@
 package com.example.todolistapp.ui.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -22,17 +23,30 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.todolistapp.data.Todo
 import com.example.todolistapp.ui.theme.checkedColor
 import com.example.todolistapp.ui.theme.textColor
 
 @Composable
-fun TaskItem(modifier: Modifier = Modifier) {
-    var isChecked by remember { mutableStateOf(false) }
+fun TodoItem(
+    modifier: Modifier = Modifier,
+    todo: Todo,
+    onClick: () -> Unit,
+    onDeleteClick: () -> Unit,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    var isChecked by remember { mutableStateOf(todo.isCompleted) }
     Card(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable {
+                onClick()
+            },
         shape = RoundedCornerShape(100),
         colors = CardDefaults.cardColors(
             containerColor = Color.White
@@ -47,7 +61,7 @@ fun TaskItem(modifier: Modifier = Modifier) {
                 .padding(vertical = 8.dp, horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            IconButton(onClick = { /*TODO*/ }) {
+            IconButton(onClick = { onDeleteClick() }) {
                 Icon(
                     imageVector = Icons.Default.Clear,
                     contentDescription = "Delete Task",
@@ -56,16 +70,20 @@ fun TaskItem(modifier: Modifier = Modifier) {
             }
             
             Text(
-                text = "Sample Task",
+                text = todo.task,
                 fontSize = 20.sp,
-                color = textColor
+                color = textColor,
+                style = TextStyle(textDecoration = if (isChecked) TextDecoration.LineThrough else null)
             )
 
             Spacer(modifier = Modifier.weight(1f))
 
             Checkbox(
                 checked = isChecked,
-                onCheckedChange = { isChecked = it },
+                onCheckedChange = {
+                    isChecked = it
+                    onCheckedChange(it)
+                },
                 colors = CheckboxDefaults.colors(
                     checkedColor = checkedColor
                 )
@@ -76,6 +94,12 @@ fun TaskItem(modifier: Modifier = Modifier) {
 
 @Preview(showBackground = true)
 @Composable
-fun TaskItemPreview() {
-    TaskItem()
+fun TodoItemPreview() {
+    TodoItem(
+        todo = Todo(id = 1, "Creating Task", false),
+        onClick = { /*TODO*/ },
+        onDeleteClick = { /*TODO*/ }
+    ) {
+
+    }
 }
